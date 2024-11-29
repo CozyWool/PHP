@@ -25,6 +25,6 @@
 </form>
 <?php
 if (isset($_POST['registerButton'])) {
-    addUser($_POST['username'], $_POST['password'], $_POST['confirmPassword'], $_POST['email']);
+    register($_POST['username'], $_POST['password'], $_POST['confirmPassword'], $_POST['email']);
 }
 ?>

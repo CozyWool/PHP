@@ -8,6 +8,14 @@ include_once('pages/dbConnection.php');
 if (isset($_COOKIE['username']) && isset($_COOKIE['password']) && isset($_COOKIE['rememberMe'])) {
     login($_COOKIE['username'], $_COOKIE['password'], $_COOKIE['rememberMe']);
 }
+$pages = [
+    'register' => 'pages/register.php',
+    'login' => 'pages/login.php',
+    'tours' => 'pages/tours.php',
+    'comments' => 'pages/comments.php',
+    'admin' => 'pages/admin.php',
+];
+$currentPage = !empty($_GET['page']) ? $_GET['page'] : 'tours';
 ?>
     <!doctype html>
     <html lang="en">
@@ -17,7 +25,7 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password']) && isset($_COOKIE
               content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <link href="css/bootstrap.min.css" rel="stylesheet">
-        <title>SiteLab1</title>
+        <title>Travel agency</title>
     </head>
     <body>
 
@@ -31,36 +39,31 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password']) && isset($_COOKIE
                 </div>
             </header>
         </div>
-        <div>
-            <?php
-            $conn = new PDO('pgsql:host=localhost;dbname=PostsPhp', 'postgres', '1');
-            $query = $conn->query("SELECT * FROM users");
-            echo '<h3>Users count: ' . ($query->rowCount()) . '</h3>';
-            ?>
-        </div>
         <div class="row">
             <section class="col-sm-12 col-md-12 col-lg-12">
                 <?php
-                if (!empty($_GET['page'])) {
-                    $page = $_GET['page'];
-                    switch ($page) {
-                        case 1:
-                            include_once('pages/addUser.php');
-                            break;
-                        case 2:
-                            include_once('pages/login.php');
-                            break;
-                        case 3:
-                            include_once('pages/showUsers.php');
-                            break;
-                        case 4:
-                            logout();
-                            break;
-                        case 5:
-                            include_once('pages/postgresql.php');
-                            break;
-                    }
+
+                switch ($currentPage) {
+                    case 'register':
+                        include_once($pages['register']);
+                        break;
+                    case 'login':
+                        include_once($pages['login']);
+                        break;
+                    case 'tours':
+                        include_once($pages['tours']);
+                        break;
+                    case 'comments':
+                        include_once($pages['comments']);
+                        break;
+                    case 'admin':
+                        include_once($pages['admin']);
+                        break;
+                    case 'logout':
+                        logout();
+                        break;
                 }
+
                 ?>
             </section>
         </div>

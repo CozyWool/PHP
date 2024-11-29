@@ -1,6 +1,4 @@
 ﻿<?php
-$users = 'pages/users.txt';
-
 function register($name, $password, $confirmPassword, $email)
 {
     $name = trim(htmlspecialchars($name));

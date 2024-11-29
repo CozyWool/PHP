@@ -5,29 +5,33 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
+            <ul class="nav nav-tabs nav-justified">
                 <?php
+                $currentPage = !empty($_GET['page']) ? $_GET['page'] : 'tours';
+
                 if (!isset($_COOKIE['isAuthenticated'])) {
                     ?>
-
                     <li class="nav-item">
-                        <a class="nav-link" href="index.php?page=1">Register</a>
+                        <a class="nav-link <?php echo ($currentPage == 'register') ? "active" : "" ?>" href="index.php?page=register">Register</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="index.php?page=2">Login</a>
+                        <a class="nav-link <?php echo ($currentPage == 'login') ? "active" : "" ?>" href="index.php?page=login">Login</a>
                     </li>
                     <?php
                 }
                 ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php?page=3">Show users</a>
+                    <a class="nav-link <?php echo ($currentPage == 'tours') ? "active" : "" ?>" href="index.php?page=tours">Tours</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php?page=5">PostgreSql example<a>
+                    <a class="nav-link <?php echo ($currentPage == 'comments') ? "active" : "" ?>" href="index.php?page=comments">Comments</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo ($currentPage == 'admin') ? "active" : "" ?>" href="index.php?page=admin">Admin</a>
                 </li>
             </ul>
         </div>
-        <ul class="navbar-nav float-left">
+        <ul class="nav nav-tabs nav-justified float-left">
             <li class="nav-item">
                 <?php
                 if (isset($_COOKIE['username'])) {
@@ -42,7 +46,7 @@
             <li class="nav-item">
                 <?php
                 if (isset($_COOKIE['isAuthenticated']))
-                    echo '<a href="index.php?page=4" class="nav-link text-dark">Logout</a>';
+                    echo '<a href="index.php?page=logout" class="nav-link text-dark">Logout</a>';
                 ?>
             </li>
         </ul>
