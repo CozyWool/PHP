@@ -76,36 +76,39 @@ function register($login, $password, $confirmPassword, $email): bool
 
     echo "<h3/><span style='color:green;'>New user added!</span>";
     $conn = null;
-//    login($name, $password, false, true);
     return true;
 }
 
-function login($username, $password, $rememberMe = false, $needToRedirect = false): bool
+function login($login, $password, $rememberMe = false, $urlToRedirect = ''): bool
 {
-    $username = trim(htmlspecialchars($username));
+    $login = trim(htmlspecialchars($login));
     $password = trim(htmlspecialchars($password));
 
     $conn = connectDb();
 
-    $query = $conn->prepare("SELECT * FROM users WHERE username = :username");
-    $query->execute(['username' => $username]);
+    $query = $conn->prepare("SELECT * FROM users WHERE login = :login");
+    if (!$query->execute(['login' => $login])) {
+        echo "<h3 class='text-center'/><span style='color:red;'>Login failed!</span>";
+        return false;
+    }
     $user = $query->fetch(PDO::FETCH_OBJ);
-    if (password_verify($password, $user->password) && $username == $user->username) {
-        $duration = $rememberMe ? time() + (60 * 60 * 24 * 7) : 0;
-
-        setcookie("username", $username, $duration, "/");
-        setcookie("password", $password, $duration, "/");
-        setcookie("email", $user->email, $duration, "/");
-        setcookie("rememberMe", $rememberMe, $duration, "/");
-        setcookie("isAuthenticated", true, $duration, "/");
-
-        if ($needToRedirect)
-            header("Location: index.php?page=3");
-        return true;
+    if (!password_verify($password, $user->password) || $login != $user->login) {
+        echo "<h3 class='text-center'/><span style='color:red;'>Login failed!</span>";
+        return false;
     }
 
-    echo "<h3 class='text-center'/><span style='color:red;'>Login failed!</span>";
-    return false;
+    $duration = $rememberMe ? time() + (60 * 60 * 24 * 7) : 0;
+
+    setcookie("login", $login, $duration, "/");
+    setcookie("email", $user->email, $duration, "/");
+    setcookie("rememberMe", $rememberMe, $duration, "/");
+    setcookie("isAuthenticated", true, $duration, "/");
+    setcookie("profilePicture", $user->profile_picture, $duration, "/");
+
+    if (!empty($urlToRedirect)) {
+        header("Location: $urlToRedirect");
+    }
+    return true;
 }
 
 function deleteCookie($name): void
@@ -117,10 +120,10 @@ function deleteCookie($name): void
 
 function logout(): void
 {
-    deleteCookie("username");
-    deleteCookie("password");
+    deleteCookie("login");
+    deleteCookie("profilePicture");
     deleteCookie("rememberMe");
     deleteCookie("isAuthenticated");
     deleteCookie("email");
-    header("Location: index.php?page=2");
+    header("Location: index.php?page=login");
 }

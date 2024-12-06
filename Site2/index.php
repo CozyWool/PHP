@@ -14,6 +14,7 @@ $pages = [
     'tours' => 'pages/tours.php',
     'comments' => 'pages/comments.php',
     'admin' => 'pages/admin.php',
+    'usersAdmin' => 'pages/usersAdmin.php',
 ];
 $currentPage = !empty($_GET['page']) ? $_GET['page'] : 'tours';
 ?>
@@ -28,7 +29,6 @@ $currentPage = !empty($_GET['page']) ? $_GET['page'] : 'tours';
         <title>Travel agency</title>
     </head>
     <body>
-
     <div class="container">
         <div class="row">
             <header class="col-sm-12 col-md-12 col-lg-12">
@@ -58,6 +58,9 @@ $currentPage = !empty($_GET['page']) ? $_GET['page'] : 'tours';
                         break;
                     case 'admin':
                         include_once($pages['admin']);
+                        break;
+                    case 'usersAdmin':
+                        include_once($pages['usersAdmin']);
                         break;
                     case 'logout':
                         logout();

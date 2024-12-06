@@ -1,4 +1,26 @@
-﻿<div class="row">
+﻿<?php
+if (!isset($_COOKIE['isAuthenticated'])) {
+    echo "<span style='color:red;'><h3>Please login to view this page!</h3></span>";
+    exit();
+}
+
+$conn = connectDb();
+$query = "SELECT * FROM users 
+          JOIN roles ON users.role_id = roles.id 
+          WHERE login=:login";
+$stmt = $conn->prepare($query);
+if (!$stmt->execute([':login' => $_COOKIE['login']])) {
+    echo "<span style='color:red;'><h3>Failed to verify roles!</h3></span>";
+    exit();
+}
+$user = $stmt->fetch(PDO::FETCH_OBJ);
+if ($user->role != 'Admin') {
+    echo "<span style='color:red;'><h3>You need to be administrator to view this page!</h3></span>";
+    exit();
+}
+
+?>
+<div class="row">
     <div class="col-sm-6 col-md-6 col-lg-12 left">
         <!--Countries-->
         <?php
@@ -31,7 +53,7 @@
                 </tbody>
             </table>
             <input type="text" class="form-control m-1" name="country" placeholder="Country">
-            <input type="submit" class="btn btn-sm btn-info m-1" name="addCountry" value="Add">
+            <input type="submit" class="btn btn-sm btn-primary m-1" name="addCountry" value="Add">
             <input type="submit" class="btn btn-sm btn-danger m-1" name="deleteCountry" value="Delete">
         </form>
 
@@ -68,8 +90,8 @@
                     }
                 }
 
-                echo "<script>" . "window.location=document.location.href;" . "</script>";
                 echo "<h3/><span style='color:green;'>Countries deleted!</span>";
+                echo "<script>" . "window.location=document.location.href;" . "</script>";
 
 
                 return true;
@@ -127,7 +149,7 @@
                 }
                 ?>
             </select>
-            <input type="submit" class="btn btn-sm btn-info m-1" name="addCity" value="Add">
+            <input type="submit" class="btn btn-sm btn-primary m-1" name="addCity" value="Add">
             <input type="submit" class="btn btn-sm btn-danger m-1" name="deleteCity" value="Delete">
         </form>
 
@@ -169,8 +191,8 @@
                     }
                 }
 
-                echo "<script>" . "window.location=document.location.href;" . "</script>";
                 echo "<h3/><span style='color:green;'>Cities deleted!</span>";
+                echo "<script>" . "window.location=document.location.href;" . "</script>";
 
 
                 return true;
@@ -248,7 +270,7 @@
                 }
                 ?>
             </select>
-            <input type="submit" class="btn btn-sm btn-info m-1" name="addHotel" value="Add">
+            <input type="submit" class="btn btn-sm btn-primary m-1" name="addHotel" value="Add">
             <input type="submit" class="btn btn-sm btn-danger m-1" name="deleteHotel" value="Delete">
         </form>
 
@@ -312,7 +334,61 @@
         }
         ?>
     </div>
-    <div class="col-sm-6 col-md-6 col-lg-6 left">
-        <!--Images-->
+    <div class="col-sm-6 col-md-6 col-lg-12 left">
+        <!-- Images	-->
+        <h2>Images</h2>
+        <form action="index.php?page=admin" method="post" enctype="multipart/form-data" class="input-group">
+            <select name="hotel_id" class="form-control me-2 ">
+
+                <?php
+
+                $conn = connectDb();
+                $query = "SELECT ho.id, co.country, ci.city, ho.hotel
+		        FROM countries co, cities ci, hotels ho
+		        WHERE co.id = ho.country_id AND ci.id = ho.city_id
+		        ORDER BY co.country";
+                $result = $conn->query($query)->fetchAll(PDO::FETCH_OBJ);
+
+
+                foreach ($result as $row) {
+                    echo '<option value="' . htmlspecialchars($row->id) . '">';
+                    echo htmlspecialchars($row->country) . ' - ' . htmlspecialchars($row->city) . ' - ' . htmlspecialchars($row->hotel);
+                    echo '</option>';
+                }
+
+                ?>
+            </select>
+            <input type="file" name="file[]" multiple accept="image/*" class="form-control me-2">
+            <input type="submit" name="addimage" value="Add" class="btn btn-sm btn-primary me-2">
+        </form>
+
+        <?php
+        if (isset($_POST['addimage'])) {
+            $hotel_id = intval($_POST['hotel_id']);
+
+            foreach ($_FILES['file']['name'] as $k => $v) {
+                if ($_FILES['file']['error'][$k] !== UPLOAD_ERR_OK) {
+                    echo '<script>alert("Upload file error: ' . htmlspecialchars($v) . '")</script>';
+                    continue;
+                }
+
+                $uploadDir = './images/';
+                $filename = basename($_FILES['file']['name'][$k]);
+                $uploadFilePath = $uploadDir . 'hotel_' . $hotel_id . '_' . $filename;
+
+                if (move_uploaded_file($_FILES['file']['tmp_name'][$k], $uploadFilePath)) {
+                    $conn = connectDb();
+                    $query = $conn->prepare('INSERT INTO images (hotel_id, image_path) VALUES (:hotel_id, :image_path)');
+
+                    if (!$query->execute([':hotel_id' => $hotel_id, ':image_path' => $uploadFilePath])) {
+                        echo '<script>alert("Database error for file: ' . htmlspecialchars($v) . '")</script>';
+                    }
+                } else {
+                    echo '<script>alert("Failed to move file: ' . htmlspecialchars($v) . '")</script>';
+                }
+            }
+        }
+        ?>
+
     </div>
 </div>
